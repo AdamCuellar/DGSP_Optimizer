@@ -39,6 +39,8 @@ public class Parameters
 	public static int numGenes;
 	public static int geneSize;
 
+	public static List<String> stockList;
+
 /*******************************************************************************
 *                              CONSTRUCTORS                                    *
 *******************************************************************************/
@@ -52,6 +54,7 @@ public class Parameters
 		problemType = parmInput.readLine().substring(30);
 
 		dataInputFileName = parmInput.readLine().substring(30);
+		stockList = parseStockList(dataInputFileName);
 
 		numRuns = Integer.parseInt(parmInput.readLine().substring(30).trim());
 		generations = Integer.parseInt(parmInput.readLine().substring(30).trim());
@@ -79,6 +82,21 @@ public class Parameters
 /*******************************************************************************
 *                                MEMBER METHODS                                *
 *******************************************************************************/
+
+	public static List<String> parseStockList(String filename) throws IOException {
+		List<String> temp = new ArrayList<String>();
+		String st;
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+
+		while ((st = br.readLine()) != null)
+			temp.add(st);
+
+		if(temp.size() > 0) {
+			Collections.sort(temp);
+		}
+
+		return temp;
+	}
 
 
 /*******************************************************************************

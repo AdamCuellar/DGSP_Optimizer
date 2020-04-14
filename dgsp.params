@@ -1,6 +1,6 @@
 Experiment ID                :dgsp
 Problem Type                 :dgsp
-Data Input File Name         :NA
+Data Input File Name         :stockList.txt
 Number of Runs               :100
 Generations per Run          :200
 Population Size              :100
@@ -11,8 +11,8 @@ Crossover Rate (4)           :0.8
 Mutation Type (5)            :1
 Mutation Rate (6)            :0.005
 Random Number Seed           :75982
-Number of Genes/Points (7)   :1
-Size of Genes (18)           :100
+Number of Genes/Points (7)   :5
+Size of Genes (18)           :1
 
 Notes:
 
@@ -35,7 +35,7 @@ Notes:
 
 6)  Mutation Rates from 0 to 1, Use "0" to turn off mutation
 
-7)	Represents number of genes in each chromosome.
+7)	Represents number of stocks in each group.
 
 8)	Determines number of bits in each gene.  Number of Genes times Size
 	gives the number of bits in each chromosome.

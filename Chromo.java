@@ -29,6 +29,9 @@ public class Chromo
 *******************************************************************************/
 
 	public Chromo(){
+		int groupSize = Parameters.stockList.size()/Parameters.numGenes;
+
+		// TODO: edit to fit representation outlined in proposal
 
 		//  Set gene values to a randum sequence of 1's and 0's
 		char geneBit;
