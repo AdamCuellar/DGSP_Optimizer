@@ -15,7 +15,8 @@ def getData(stockSymbol):
 
 def main():
     p = Pool()
-    stockList = ['AAPL']
+    #Added some oil companies, pharmacutical companies working on COVID-19 vaccine,largecap technology companies
+    stockList = ['AAPL', 'MSFT' , 'AMZN' , 'TSLA', 'CEI', 'INO', 'CRON', 'GDP' , 'RBB', 'NVAX']
 
     p.map(getData, stockList)
     return
