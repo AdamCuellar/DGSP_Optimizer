@@ -16,11 +16,11 @@ def getData(stockSymbol):
 def main():
     p = Pool()
     #Added some oil companies, pharmacutical companies working on COVID-19 vaccine,largecap technology companies, the rest after line 1 are randomly generated
-    stockList = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'CEI', 'INO', 'CRON', 'GDP', 'RBB', 'NVAX', 
-                   'IFN',  'FIS', 'CORN',  'MAR', 'WFC',  'MN', 'OUNZ', 'KBA',  'KR',  'NJR', 
-                     'FBIOP',  'GFED', 'BUY',  'SILK', 'BZM',  'FINX', 'DNLI', 'RXN',  'FIHD',  'VYGR',   
-                        'SNV',  'NRGU', 'INMB',  'APH', 'FLGE',  'XTH', 'MPV', 'PICB',  'VNCE',  'IMOM', 
-                           'LBC',  'GRX', 'SAP',  'JW', 'BVSN',  'NAK', 'NWL',  'GSC', 'SFYF', 'CTEST', ]
+    stockList = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'DIS', 'INO', 'BA', 'GDP', 'PFE', 'NVAX', 
+                   'HD',  'FIS', 'MMM',  'MAR', 'WFC',  'MN', 'NKE', 'JNJ',  'KR',  'NJR', 
+                     'MCD',  'INTC', 'GE',  'UNH', 'PG',  'IBM', 'V', 'RXN',  'AXP',  'JPM',   
+                        'SNV',  'NRGU', 'XOM',  'APH', 'GS',  'CSCO', 'CAT', 'WMT',  'VNCE',  'IMOM', 
+                           'VZ',  'MRK', 'UTX',  'JW', 'BVSN',  'NAK', 'NWL',  'GSC', 'SFYF', 'CTEST', ]
 
     p.map(getData, stockList)
     return
