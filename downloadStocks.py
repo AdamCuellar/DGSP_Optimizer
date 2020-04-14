@@ -15,8 +15,12 @@ def getData(stockSymbol):
 
 def main():
     p = Pool()
-    #Added some oil companies, pharmacutical companies working on COVID-19 vaccine,largecap technology companies
-    stockList = ['AAPL', 'MSFT' , 'AMZN' , 'TSLA', 'CEI', 'INO', 'CRON', 'GDP' , 'RBB', 'NVAX']
+    #Added some oil companies, pharmacutical companies working on COVID-19 vaccine,largecap technology companies, the rest after line 1 are randomly generated
+    stockList = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'CEI', 'INO', 'CRON', 'GDP', 'RBB', 'NVAX', 
+                   'IFN',  'FIS', 'CORN',  'MAR', 'WFC',  'MN', 'OUNZ', 'KBA',  'KR',  'NJR', 
+                     'FBIOP',  'GFED', 'BUY',  'SILK', 'BZM',  'FINX', 'DNLI', 'RXN',  'FIHD',  'VYGR',   
+                        'SNV',  'NRGU', 'INMB',  'APH', 'FLGE',  'XTH', 'MPV', 'PICB',  'VNCE',  'IMOM', 
+                           'LBC',  'GRX', 'SAP',  'JW', 'BVSN',  'NAK', 'NWL',  'GSC', 'SFYF', 'CTEST', ]
 
     p.map(getData, stockList)
     return
