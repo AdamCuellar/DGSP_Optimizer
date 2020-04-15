@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 
-public class Dgsp extends FitnessFunction{
+public class DGSP extends FitnessFunction{
 
 /*******************************************************************************
 *                            INSTANCE VARIABLES                                *
