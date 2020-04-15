@@ -23,8 +23,8 @@ public class Dgsp extends FitnessFunction{
 *                              CONSTRUCTORS                                    *
 *******************************************************************************/
 
-	public Dgsp(){
-		name = "Diverse Group Stock Portfolio Problem";
+	public DGSP(){
+		name = "DGSP Problem";
 	}
 
 /*******************************************************************************
