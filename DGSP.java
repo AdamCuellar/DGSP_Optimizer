@@ -53,7 +53,7 @@ public class DGSP extends FitnessFunction{
 
 							int dominatorCount = 1;//keep count of all individuals that dominate x(i)
 							
-							X(i).rawFitness+= X(dominatorCount-1).rawFitness;//Accumulate all fitness values of individuals that dominate x(i)
+							X(z).rawFitness+= X(dominatorCount-1).rawFitness;//Accumulate all fitness values of individuals that dominate x(i)
 							
 							dominatorCount++;
 
