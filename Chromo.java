@@ -63,9 +63,9 @@ public class Chromo
 				}
 			}
 
-			portfolio += Search.r.nextInt(9);
+			portfolio += (Search.r.nextInt(10) + 1);
 
-			chromo.put(group, portfolio);
+			this.chromo.put(group, portfolio);
 		}
 
 
@@ -125,24 +125,50 @@ public class Chromo
 
 	public void doMutation(){
 
-		String mutChromo = "";
+		Map <String, String> mutChromo = new HashMap<>();
 		char x;
 
 		switch (Parameters.mutationType){
 
-		case 1:     //  Replace with new random number
+		case 1:     // Two Phase Mutation
+			int randPos1;
+			int randPos2;
+			char[] tempArray;
+			for(Map.Entry<String, String> entry : chromo.entrySet()) {
+				String[] group = splitToNChar(entry.getKey(), 2);
+				String portfolio = entry.getValue();
+				if(Search.r.nextDouble() < Parameters.mutationRate) {
+					String temp;
 
-//			for (int j=0; j<(Parameters.geneSize * Parameters.numGenes); j++){
-//				x = this.chromo.charAt(j);
-//				randnum = Search.r.nextDouble();
-//				if (randnum < Parameters.mutationRate){
-//					if (x == '1') x = '0';
-//					else x = '1';
-//				}
-//				mutChromo = mutChromo + x;
-//			}
-//			this.chromo = mutChromo;
-//			break;
+					randPos1 = Search.r.nextInt(group.length);
+					randPos2 = Search.r.nextInt(group.length);
+
+					// swap stocks
+					temp = group[randPos1];
+					group[randPos1] = group[randPos2];
+					group[randPos2] = temp;
+
+					// flip random bit
+					temp = portfolio.substring(0, 7);
+					randPos1 = Search.r.nextInt(temp.length());
+					tempArray = temp.toCharArray();
+
+					if (tempArray[randPos1] == '1') {
+						tempArray[randPos1] = '0';
+					} else {
+						tempArray[randPos1] = '1';
+					}
+
+					// change unit randomly
+					portfolio = String.valueOf(tempArray) + (Search.r.nextInt(10) + 1);
+					mutChromo.put(String.join("",group), portfolio);
+				}
+				else {
+					mutChromo.put(String.join("",group), portfolio);
+				}
+			}
+			this.chromo = mutChromo;
+			break;
 
 		default:
 			System.out.println("ERROR - No mutation method selected");
@@ -243,6 +269,28 @@ public class Chromo
 		targetA.sclFitness = sourceB.sclFitness;
 		targetA.proFitness = sourceB.proFitness;
 		return;
+	}
+
+	/**
+	 * Source code of snippet: https://kodejava.org/how-to-split-a-string-by-a-number-of-characters/
+	 * Author: Wayan Saryada
+	 * Published on: July 8, 2019
+	 * Visited on: Febrary 22, 2020
+	 *
+	 * Split text into n number of characters.
+	 *
+	 * @param text the text to be split.
+	 * @param size the split size.
+	 * @return an array of the split text.
+	 */
+	public static String[] splitToNChar(String text, int size) {
+		List<String> parts = new ArrayList<>();
+
+		int length = text.length();
+		for (int i = 0; i < length; i += size) {
+			parts.add(text.substring(i, Math.min(length, i + size)));
+		}
+		return parts.toArray(new String[0]);
 	}
 
 }   // End of Chromo.java ******************************************************
