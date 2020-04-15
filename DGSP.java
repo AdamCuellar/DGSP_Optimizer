@@ -40,21 +40,29 @@ public class DGSP extends FitnessFunction{
 		X.rawFitness = 0;
 
 		for (int z = 0; z < Parameters.popSize; z++){
-			if (X.chromo.getRank(z) == 1){//FIXHERE modify to appropriate problem representation and/or getter method
+			if (X(z).getRank() == 1){//FIXHERE modify to appropriate problem representation and/or getter method
 				X.rawFitness = (Parameters.popSize - 1)/(Parameters.popSize + 1);
 			}
-			for (int y= 1; y < Parameters.popSize  ; y++){
-				//X.chromo.rawFitness = 1 + X.DominatedBy(X.chromo.getRank(z)"ProblemRepresentation")/(Parameters.popSize + 1)//FIXHERE Adjust names as well as details to domination front, how does an individual dominate another
-					//nonDominatedFitness += X.rawFitness.getRank(z);//Cp must dominate cq overall must end up with f(Cq) = 1 + Sum of f(Cp)
-					if (X.chromo.getRank(y) > 1){//modify to appropriate problem representation and/or getter method
+		
 				
-						//make nonDominaters temp var
-						X.rawFitness+= X.rawFitness;//FIX HERE doublecheck any mistakes,
-				
+					//Cp must dominate cq overall must end up with f(Cq) = 1 + Sum of f(Cp)
+					
+					else if (X(z).getRank() > 1){//modify to appropriate problem representation and/or getter method
+						
+						for (int y= 0; y < Parameters.popSize  ; y++){
 
-				}
-			}
-			//if (X.chromo.charAt(z) == '1') X.rawFitness += 1;//old onemax fitness function
+							int dominatorCount = 1;//keep count of all individuals that dominate x(i)
+							
+							X(i).rawFitness+= X(dominatorCount-1).rawFitness;//Accumulate all fitness values of individuals that dominate x(i)
+							
+							dominatorCount++;
+
+						}
+						
+						X(i).rawFitness += 1;
+
+					}
+			//CLEANUP if (X.chromo.charAt(z) == '1') X.rawFitness += 1;//old onemax fitness function
 
 		}
 	}
