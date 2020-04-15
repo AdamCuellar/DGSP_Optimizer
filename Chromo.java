@@ -13,7 +13,7 @@ public class Chromo
 *                            INSTANCE VARIABLES                                *
 *******************************************************************************/
 
-	public String chromo;
+	public Map<String, String> chromo;
 	public double rawFitness;
 	public double sclFitness;
 	public double proFitness;
@@ -29,21 +29,45 @@ public class Chromo
 *******************************************************************************/
 
 	public Chromo(){
+		chromo = new HashMap<>();
 		int groupSize = Parameters.stockList.size()/Parameters.numGenes;
+		int randInt;
 
 		// TODO: edit to fit representation outlined in proposal
 
-		//  Set gene values to a randum sequence of 1's and 0's
-		char geneBit;
-		chromo = "";
+		//  Create a random groups
+		String geneBit;
 		for (int i=0; i<Parameters.numGenes; i++){
+			String group = "";
 			for (int j=0; j<Parameters.geneSize; j++){
-				randnum = Search.r.nextDouble();
-				if (randnum > 0.5) geneBit = '0';
-				else geneBit = '1';
-				this.chromo = chromo + geneBit;
+				randInt = Search.r.nextInt(Parameters.stockList.size());
+				if(randInt < 10) {
+					geneBit = "0" + randInt;
+				}
+				else
+				{
+					geneBit = Integer.toString(randInt);
+				}
+
+				group = group + geneBit;
 			}
+
+			String portfolio = "";
+			for(int k=0; k<7; k++) {
+				randnum = Search.r.nextDouble();
+				if(randnum > 0.5) {
+					portfolio += "1";
+				}
+				else{
+					portfolio += "0";
+				}
+			}
+
+			portfolio += Search.r.nextInt(9);
+
+			chromo.put(group, portfolio);
 		}
+
 
 		this.rawFitness = -1;   //  Fitness not yet evaluated
 		this.sclFitness = -1;   //  Fitness not yet scaled
@@ -57,45 +81,45 @@ public class Chromo
 
 	//  Get Alpha Represenation of a Gene **************************************
 
-	public String getGeneAlpha(int geneID){
-		int start = geneID * Parameters.geneSize;
-		int end = (geneID+1) * Parameters.geneSize;
-		String geneAlpha = this.chromo.substring(start, end);
-		return (geneAlpha);
-	}
+//	public String getGeneAlpha(int geneID){
+//		int start = geneID * Parameters.geneSize;
+//		int end = (geneID+1) * Parameters.geneSize;
+//		String geneAlpha = this.chromo.substring(start, end);
+//		return (geneAlpha);
+//	}
 
 	//  Get Integer Value of a Gene (Positive or Negative, 2's Compliment) ****
 
-	public int getIntGeneValue(int geneID){
-		String geneAlpha = "";
-		int geneValue;
-		char geneSign;
-		char geneBit;
-		geneValue = 0;
-		geneAlpha = getGeneAlpha(geneID);
-		for (int i=Parameters.geneSize-1; i>=1; i--){
-			geneBit = geneAlpha.charAt(i);
-			if (geneBit == '1') geneValue = geneValue + (int) Math.pow(2.0, Parameters.geneSize-i-1);
-		}
-		geneSign = geneAlpha.charAt(0);
-		if (geneSign == '1') geneValue = geneValue - (int)Math.pow(2.0, Parameters.geneSize-1);
-		return (geneValue);
-	}
+//	public int getIntGeneValue(int geneID){
+//		String geneAlpha = "";
+//		int geneValue;
+//		char geneSign;
+//		char geneBit;
+//		geneValue = 0;
+//		geneAlpha = getGeneAlpha(geneID);
+//		for (int i=Parameters.geneSize-1; i>=1; i--){
+//			geneBit = geneAlpha.charAt(i);
+//			if (geneBit == '1') geneValue = geneValue + (int) Math.pow(2.0, Parameters.geneSize-i-1);
+//		}
+//		geneSign = geneAlpha.charAt(0);
+//		if (geneSign == '1') geneValue = geneValue - (int)Math.pow(2.0, Parameters.geneSize-1);
+//		return (geneValue);
+//	}
 
 	//  Get Integer Value of a Gene (Positive only) ****************************
 
-	public int getPosIntGeneValue(int geneID){
-		String geneAlpha = "";
-		int geneValue;
-		char geneBit;
-		geneValue = 0;
-		geneAlpha = getGeneAlpha(geneID);
-		for (int i=Parameters.geneSize-1; i>=0; i--){
-			geneBit = geneAlpha.charAt(i);
-			if (geneBit == '1') geneValue = geneValue + (int) Math.pow(2.0, Parameters.geneSize-i-1);
-		}
-		return (geneValue);
-	}
+//	public int getPosIntGeneValue(int geneID){
+//		String geneAlpha = "";
+//		int geneValue;
+//		char geneBit;
+//		geneValue = 0;
+//		geneAlpha = getGeneAlpha(geneID);
+//		for (int i=Parameters.geneSize-1; i>=0; i--){
+//			geneBit = geneAlpha.charAt(i);
+//			if (geneBit == '1') geneValue = geneValue + (int) Math.pow(2.0, Parameters.geneSize-i-1);
+//		}
+//		return (geneValue);
+//	}
 
 	//  Mutate a Chromosome Based on Mutation Type *****************************
 
@@ -108,17 +132,17 @@ public class Chromo
 
 		case 1:     //  Replace with new random number
 
-			for (int j=0; j<(Parameters.geneSize * Parameters.numGenes); j++){
-				x = this.chromo.charAt(j);
-				randnum = Search.r.nextDouble();
-				if (randnum < Parameters.mutationRate){
-					if (x == '1') x = '0';
-					else x = '1';
-				}
-				mutChromo = mutChromo + x;
-			}
-			this.chromo = mutChromo;
-			break;
+//			for (int j=0; j<(Parameters.geneSize * Parameters.numGenes); j++){
+//				x = this.chromo.charAt(j);
+//				randnum = Search.r.nextDouble();
+//				if (randnum < Parameters.mutationRate){
+//					if (x == '1') x = '0';
+//					else x = '1';
+//				}
+//				mutChromo = mutChromo + x;
+//			}
+//			this.chromo = mutChromo;
+//			break;
 
 		default:
 			System.out.println("ERROR - No mutation method selected");
@@ -171,13 +195,13 @@ public class Chromo
 
 		case 1:     //  Single Point Crossover
 
-			//  Select crossover point
-			xoverPoint1 = 1 + (int)(Search.r.nextDouble() * (Parameters.numGenes * Parameters.geneSize-1));
-
-			//  Create child chromosome from parental material
-			child1.chromo = parent1.chromo.substring(0,xoverPoint1) + parent2.chromo.substring(xoverPoint1);
-			child2.chromo = parent2.chromo.substring(0,xoverPoint1) + parent1.chromo.substring(xoverPoint1);
-			break;
+//			//  Select crossover point
+//			xoverPoint1 = 1 + (int)(Search.r.nextDouble() * (Parameters.numGenes * Parameters.geneSize-1));
+//
+//			//  Create child chromosome from parental material
+//			child1.chromo = parent1.chromo.substring(0,xoverPoint1) + parent2.chromo.substring(xoverPoint1);
+//			child2.chromo = parent2.chromo.substring(0,xoverPoint1) + parent1.chromo.substring(xoverPoint1);
+//			break;
 
 		case 2:     //  Two Point Crossover
 

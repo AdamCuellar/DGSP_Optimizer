@@ -34,27 +34,27 @@ public class DGSP extends FitnessFunction{
 
 	public void doRawFitness(Chromo X){
 
-		X.rawFitness = 0;
-		for (int z=0; z<Parameters.numGenes * Parameters.geneSize; z++){
-			if (X.chromo.charAt(z) == '1') X.rawFitness += 1;
-		}
+//		X.rawFitness = 0;
+//		for (int z=0; z<Parameters.numGenes * Parameters.geneSize; z++){
+//			if (X.chromo.charAt(z) == '1') X.rawFitness += 1;
+//		}
 	}
 
 //  PRINT OUT AN INDIVIDUAL GENE TO THE SUMMARY FILE *********************************
 
 	public void doPrintGenes(Chromo X, FileWriter output) throws IOException{
 
-		for (int i=0; i<Parameters.numGenes; i++){
-			Hwrite.right(X.getGeneAlpha(i),11,output);
-		}
-		output.write("   RawFitness");
-		output.write("\n        ");
-		for (int i=0; i<Parameters.numGenes; i++){
-			Hwrite.right(X.getPosIntGeneValue(i),11,output);
-		}
-		Hwrite.right((int) X.rawFitness,13,output);
-		output.write("\n\n");
-		return;
+//		for (int i=0; i<Parameters.numGenes; i++){
+//			Hwrite.right(X.getGeneAlpha(i),11,output);
+//		}
+//		output.write("   RawFitness");
+//		output.write("\n        ");
+//		for (int i=0; i<Parameters.numGenes; i++){
+//			Hwrite.right(X.getPosIntGeneValue(i),11,output);
+//		}
+//		Hwrite.right((int) X.rawFitness,13,output);
+//		output.write("\n\n");
+//		return;
 	}
 
 /*******************************************************************************
