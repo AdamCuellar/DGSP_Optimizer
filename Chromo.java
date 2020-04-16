@@ -32,6 +32,7 @@ public class Chromo
 		chromo = new HashMap<>();
 		int groupSize = Parameters.stockList.size()/Parameters.numGenes;
 		int randInt;
+		List<Integer> noDuplicates = new ArrayList<>();;
 
 		// TODO: edit to fit representation outlined in proposal
 
@@ -39,8 +40,15 @@ public class Chromo
 		String geneBit;
 		for (int i=0; i<Parameters.numGenes; i++){
 			String group = "";
+			noDuplicates.clear();
 			for (int j=0; j<Parameters.geneSize; j++){
 				randInt = Search.r.nextInt(Parameters.stockList.size());
+
+				// make sure we dont have any duplicate stocks
+				while(noDuplicates.contains(randInt)) {
+					randInt = Search.r.nextInt(Parameters.stockList.size());
+				}
+
 				if(randInt < 10) {
 					geneBit = "0" + randInt;
 				}
@@ -48,6 +56,8 @@ public class Chromo
 				{
 					geneBit = Integer.toString(randInt);
 				}
+
+				noDuplicates.add(randInt);
 
 				group = group + geneBit;
 			}
@@ -219,22 +229,42 @@ public class Chromo
 
 		switch (Parameters.xoverType){
 
-		case 1:     //  Single Point Crossover
+			case 1:     // Two Phase Crossover
+				Map <String, String> newChromo1 = new HashMap<>();
+				Map <String, String> newChromo2 = new HashMap<>();
 
-//			//  Select crossover point
-//			xoverPoint1 = 1 + (int)(Search.r.nextDouble() * (Parameters.numGenes * Parameters.geneSize-1));
-//
-//			//  Create child chromosome from parental material
-//			child1.chromo = parent1.chromo.substring(0,xoverPoint1) + parent2.chromo.substring(xoverPoint1);
-//			child2.chromo = parent2.chromo.substring(0,xoverPoint1) + parent1.chromo.substring(xoverPoint1);
-//			break;
+				int randInt = Search.r.nextInt(parent1.chromo.size()) + 1;
+				int iterated = 0;
 
-		case 2:     //  Two Point Crossover
+				// switch values at random point randInt from parent1
+				for(Map.Entry<String, String> entry : parent1.chromo.entrySet()) {
+					if (iterated < randInt) {
+						newChromo1.put(entry.getKey(), entry.getValue());
+					} else {
+						newChromo2.put(entry.getKey(), entry.getValue());
+					}
 
-		case 3:     //  Uniform Crossover
+					iterated++;
+				}
 
-		default:
-			System.out.println("ERROR - Bad crossover method selected");
+				iterated = 0;
+				// switch values at random point randInt from parent2
+				for(Map.Entry<String, String> entry : parent2.chromo.entrySet()) {
+					if (iterated < randInt) {
+						newChromo2.put(entry.getKey(), entry.getValue());
+					} else {
+						newChromo1.put(entry.getKey(), entry.getValue());
+					}
+
+					iterated++;
+				}
+
+				child1.chromo = newChromo1;
+				child2.chromo = newChromo2;
+
+				break;
+				default:
+				System.out.println("ERROR - Bad crossover method selected");
 		}
 
 		//  Set fitness values back to zero
