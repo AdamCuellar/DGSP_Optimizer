@@ -32,6 +32,7 @@ public class Chromo
 		chromo = new HashMap<>();
 		int groupSize = Parameters.stockList.size()/Parameters.numGenes;
 		int randInt;
+		List<Integer> noDuplicates = new ArrayList<>();;
 
 		// TODO: edit to fit representation outlined in proposal
 
@@ -39,8 +40,15 @@ public class Chromo
 		String geneBit;
 		for (int i=0; i<Parameters.numGenes; i++){
 			String group = "";
+			noDuplicates.clear();
 			for (int j=0; j<Parameters.geneSize; j++){
 				randInt = Search.r.nextInt(Parameters.stockList.size());
+
+				// make sure we dont have any duplicate stocks
+				while(noDuplicates.contains(randInt)) {
+					randInt = Search.r.nextInt(Parameters.stockList.size());
+				}
+
 				if(randInt < 10) {
 					geneBit = "0" + randInt;
 				}
@@ -48,6 +56,8 @@ public class Chromo
 				{
 					geneBit = Integer.toString(randInt);
 				}
+
+				noDuplicates.add(randInt);
 
 				group = group + geneBit;
 			}
@@ -63,9 +73,9 @@ public class Chromo
 				}
 			}
 
-			portfolio += Search.r.nextInt(9);
+			portfolio += (Search.r.nextInt(10) + 1);
 
-			chromo.put(group, portfolio);
+			this.chromo.put(group, portfolio);
 		}
 
 
@@ -125,24 +135,50 @@ public class Chromo
 
 	public void doMutation(){
 
-		String mutChromo = "";
+		Map <String, String> mutChromo = new HashMap<>();
 		char x;
 
 		switch (Parameters.mutationType){
 
-		case 1:     //  Replace with new random number
+		case 1:     // Two Phase Mutation
+			int randPos1;
+			int randPos2;
+			char[] tempArray;
+			for(Map.Entry<String, String> entry : chromo.entrySet()) {
+				String[] group = splitToNChar(entry.getKey(), 2);
+				String portfolio = entry.getValue();
+				if(Search.r.nextDouble() < Parameters.mutationRate) {
+					String temp;
 
-//			for (int j=0; j<(Parameters.geneSize * Parameters.numGenes); j++){
-//				x = this.chromo.charAt(j);
-//				randnum = Search.r.nextDouble();
-//				if (randnum < Parameters.mutationRate){
-//					if (x == '1') x = '0';
-//					else x = '1';
-//				}
-//				mutChromo = mutChromo + x;
-//			}
-//			this.chromo = mutChromo;
-//			break;
+					randPos1 = Search.r.nextInt(group.length);
+					randPos2 = Search.r.nextInt(group.length);
+
+					// swap stocks
+					temp = group[randPos1];
+					group[randPos1] = group[randPos2];
+					group[randPos2] = temp;
+
+					// flip random bit
+					temp = portfolio.substring(0, 7);
+					randPos1 = Search.r.nextInt(temp.length());
+					tempArray = temp.toCharArray();
+
+					if (tempArray[randPos1] == '1') {
+						tempArray[randPos1] = '0';
+					} else {
+						tempArray[randPos1] = '1';
+					}
+
+					// change unit randomly
+					portfolio = String.valueOf(tempArray) + (Search.r.nextInt(10) + 1);
+					mutChromo.put(String.join("",group), portfolio);
+				}
+				else {
+					mutChromo.put(String.join("",group), portfolio);
+				}
+			}
+			this.chromo = mutChromo;
+			break;
 
 		default:
 			System.out.println("ERROR - No mutation method selected");
@@ -193,22 +229,42 @@ public class Chromo
 
 		switch (Parameters.xoverType){
 
-		case 1:     //  Single Point Crossover
+			case 1:     // Two Phase Crossover
+				Map <String, String> newChromo1 = new HashMap<>();
+				Map <String, String> newChromo2 = new HashMap<>();
 
-//			//  Select crossover point
-//			xoverPoint1 = 1 + (int)(Search.r.nextDouble() * (Parameters.numGenes * Parameters.geneSize-1));
-//
-//			//  Create child chromosome from parental material
-//			child1.chromo = parent1.chromo.substring(0,xoverPoint1) + parent2.chromo.substring(xoverPoint1);
-//			child2.chromo = parent2.chromo.substring(0,xoverPoint1) + parent1.chromo.substring(xoverPoint1);
-//			break;
+				int randInt = Search.r.nextInt(parent1.chromo.size()) + 1;
+				int iterated = 0;
 
-		case 2:     //  Two Point Crossover
+				// switch values at random point randInt from parent1
+				for(Map.Entry<String, String> entry : parent1.chromo.entrySet()) {
+					if (iterated < randInt) {
+						newChromo1.put(entry.getKey(), entry.getValue());
+					} else {
+						newChromo2.put(entry.getKey(), entry.getValue());
+					}
 
-		case 3:     //  Uniform Crossover
+					iterated++;
+				}
 
-		default:
-			System.out.println("ERROR - Bad crossover method selected");
+				iterated = 0;
+				// switch values at random point randInt from parent2
+				for(Map.Entry<String, String> entry : parent2.chromo.entrySet()) {
+					if (iterated < randInt) {
+						newChromo2.put(entry.getKey(), entry.getValue());
+					} else {
+						newChromo1.put(entry.getKey(), entry.getValue());
+					}
+
+					iterated++;
+				}
+
+				child1.chromo = newChromo1;
+				child2.chromo = newChromo2;
+
+				break;
+				default:
+				System.out.println("ERROR - Bad crossover method selected");
 		}
 
 		//  Set fitness values back to zero
@@ -243,6 +299,28 @@ public class Chromo
 		targetA.sclFitness = sourceB.sclFitness;
 		targetA.proFitness = sourceB.proFitness;
 		return;
+	}
+
+	/**
+	 * Source code of snippet: https://kodejava.org/how-to-split-a-string-by-a-number-of-characters/
+	 * Author: Wayan Saryada
+	 * Published on: July 8, 2019
+	 * Visited on: Febrary 22, 2020
+	 *
+	 * Split text into n number of characters.
+	 *
+	 * @param text the text to be split.
+	 * @param size the split size.
+	 * @return an array of the split text.
+	 */
+	public static String[] splitToNChar(String text, int size) {
+		List<String> parts = new ArrayList<>();
+
+		int length = text.length();
+		for (int i = 0; i < length; i += size) {
+			parts.add(text.substring(i, Math.min(length, i + size)));
+		}
+		return parts.toArray(new String[0]);
 	}
 
 }   // End of Chromo.java ******************************************************
