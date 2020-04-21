@@ -4,8 +4,11 @@
 *******************************************************************************/
 
 import java.io.*;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.text.*;
+
+import static java.util.Collections.reverse;
 
 public class Chromo
 {
@@ -33,8 +36,6 @@ public class Chromo
 		int groupSize = Parameters.stockList.size()/Parameters.numGenes;
 		int randInt;
 		List<Integer> noDuplicates = new ArrayList<>();;
-
-		// TODO: edit to fit representation outlined in proposal
 
 		//  Create a random groups
 		String geneBit;
@@ -73,7 +74,7 @@ public class Chromo
 				}
 			}
 
-			portfolio += (Search.r.nextInt(10) + 1);
+			portfolio += (Search.r.nextInt(9) + 1);
 
 			this.chromo.put(group, portfolio);
 		}
@@ -131,6 +132,95 @@ public class Chromo
 //		return (geneValue);
 //	}
 
+	public static List<String> getRand() {
+		List<String> randGen = new ArrayList<>();
+		int groupSize = Parameters.stockList.size()/Parameters.numGenes;
+		int randInt;
+		List<Integer> noDuplicates = new ArrayList<>();
+
+		//  Create a random groups
+		String geneBit;
+		String group = "";
+		for (int j=0; j<Parameters.geneSize; j++){
+			randInt = Search.r.nextInt(Parameters.stockList.size());
+
+			// make sure we dont have any duplicate stocks
+			while(noDuplicates.contains(randInt)) {
+				randInt = Search.r.nextInt(Parameters.stockList.size());
+			}
+
+			if(randInt < 10) {
+				geneBit = "0" + randInt;
+			}
+			else
+			{
+				geneBit = Integer.toString(randInt);
+			}
+
+			noDuplicates.add(randInt);
+
+			group = group + geneBit;
+		}
+
+		String portfolio = "";
+		for(int k=0; k<7; k++) {
+			randnum = Search.r.nextDouble();
+			if(randnum > 0.5) {
+				portfolio += "1";
+			}
+			else{
+				portfolio += "0";
+			}
+		}
+
+		portfolio += (Search.r.nextInt(9) + 1);
+
+		randGen.add(group);
+		randGen.add(portfolio);
+		return randGen;
+	}
+
+	// get 2-year return for individual
+	public float getPortReturn(String group, String portfolio) {
+		float portReturn= 0;
+		String[] gr = splitToNChar(group, 2);
+		double bi = (double)Integer.parseInt(portfolio.substring(0,7), 2) / 127.0;
+		int units = Integer.parseInt(portfolio.substring(7));
+
+		for (String s : gr) {
+			int ticker = Integer.parseInt(s);
+			List<Float> returns = Parameters.yearReturns.get(ticker);
+			// only get last two years
+			float r = returns.get(returns.size() - 1) + returns.get(returns.size() - 2);
+
+			if (bi > 0.5) {
+				portReturn += (units*1000) * r;
+			}
+		}
+
+		return portReturn;
+	}
+
+	public double getSortinoRatio(){
+		double sortino;
+		double prt = 1000.0;
+		double avgPortReturn = 0;
+		double dsd = 0;
+		boolean here = false;
+
+		for(Map.Entry<String, String> entry : chromo.entrySet()) {
+			float portReturn = getPortReturn(entry.getKey(), entry.getValue());
+			avgPortReturn += portReturn;
+			dsd += Math.pow(Double.min(0, portReturn - prt), 2);
+		}
+
+		avgPortReturn /= chromo.size();
+		dsd = Math.sqrt(dsd);
+		sortino = (avgPortReturn - prt)/dsd;
+
+		return sortino;
+	}
+
 	//  Mutate a Chromosome Based on Mutation Type *****************************
 
 	public void doMutation(){
@@ -170,7 +260,8 @@ public class Chromo
 					}
 
 					// change unit randomly
-					portfolio = String.valueOf(tempArray) + (Search.r.nextInt(10) + 1);
+					int newUnit = (Search.r.nextInt(9) + 1);
+					portfolio = new String(tempArray) + newUnit;
 					mutChromo.put(String.join("",group), portfolio);
 				}
 				else {
@@ -195,7 +286,7 @@ public class Chromo
 
 		double rWheel = 0;
 		int j = 0;
-		int k = 0;
+		int k = Parameters.popSize/10;
 
 		switch (Parameters.selectType){
 
@@ -213,11 +304,28 @@ public class Chromo
 			return(j);
 
 		case 2:     //  Tournament Selection
+			int[] selectedMembers = new int[k];
 
+			// Select k members for tournament
+			for(int i=0; i < k; i++)
+			{
+				randnum = Search.r.nextDouble();
+				selectedMembers[i] = (int) (randnum * Parameters.popSize);
+			}
+
+			// Find best member as parent
+			int bestChromoIndex = 0;
+			for(int i=1; i < k; i++)
+			{
+				if (Search.member[selectedMembers[i]].rawFitness < Search.member[selectedMembers[bestChromoIndex]].rawFitness)
+					bestChromoIndex = i;
+			}
+
+			return selectedMembers[bestChromoIndex];
 		default:
 			System.out.println("ERROR - No selection method selected");
 		}
-	return(-1);
+		return(-1);
 	}
 
 	//  Produce a new child from two parents  **********************************
@@ -233,30 +341,48 @@ public class Chromo
 				Map <String, String> newChromo1 = new HashMap<>();
 				Map <String, String> newChromo2 = new HashMap<>();
 
-				int randInt = Search.r.nextInt(parent1.chromo.size()) + 1;
+				int randInt = Search.r.nextInt(parent1.chromo.size() - 1) + 1;
 				int iterated = 0;
+
+				String key;
+				String value;
 
 				// switch values at random point randInt from parent1
 				for(Map.Entry<String, String> entry : parent1.chromo.entrySet()) {
+					key = entry.getKey();
+					value = entry.getValue();
 					if (iterated < randInt) {
-						newChromo1.put(entry.getKey(), entry.getValue());
+						newChromo1.put(key, value);
 					} else {
-						newChromo2.put(entry.getKey(), entry.getValue());
+						newChromo2.put(key, value);
 					}
 
-					iterated++;
+					iterated += 1;
 				}
 
 				iterated = 0;
+
 				// switch values at random point randInt from parent2
 				for(Map.Entry<String, String> entry : parent2.chromo.entrySet()) {
+					key = entry.getKey();
+					value = entry.getValue();
 					if (iterated < randInt) {
-						newChromo2.put(entry.getKey(), entry.getValue());
+						newChromo2.put(key, value);
 					} else {
 						newChromo1.put(entry.getKey(), entry.getValue());
 					}
 
-					iterated++;
+					iterated += 1;
+				}
+
+				while(newChromo1.size() < 5) {
+					List<String> rand = getRand();
+					newChromo1.put(rand.get(0), rand.get(1));
+				}
+
+				while(newChromo2.size() < 5) {
+					List<String> rand = getRand();
+					newChromo2.put(rand.get(0), rand.get(1));
 				}
 
 				child1.chromo = newChromo1;

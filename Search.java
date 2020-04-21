@@ -142,6 +142,9 @@ public class Search {
 				sumRawFitness2 = 0;
 				bestOfGenChromo.rawFitness = defaultBest;
 
+				// rank each member
+				Map<Integer, Integer> ranks = rankPop(member);
+
 				//	Test Fitness of Each Member
 				for (int i=0; i<Parameters.popSize; i++){
 
@@ -149,7 +152,7 @@ public class Search {
 					member[i].sclFitness = 0;
 					member[i].proFitness = 0;
 
-					problem.doRawFitness(member[i]);
+					problem.doRawFitness(member[i], ranks, i);
 
 					sumRawFitness = sumRawFitness + member[i].rawFitness;
 					sumRawFitness2 = sumRawFitness2 +
@@ -204,7 +207,7 @@ public class Search {
 							);
 
 				// Output generation statistics to screen
-				System.out.println(R + "\t" + G +  "\t" + (int)bestOfGenChromo.rawFitness + "\t" + averageRawFitness + "\t" + stdevRawFitness);
+				System.out.println(R + "\t" + G +  "\t" + bestOfGenChromo.rawFitness + "\t" + averageRawFitness + "\t" + stdevRawFitness);
 
 				// Output generation statistics to summary file
 				summaryOutput.write(" R ");
@@ -379,6 +382,55 @@ public class Search {
 		System.out.println("End  :  " + endTime);
 
 	} // End of Main Class
+
+	private static Map<Integer, Integer> rankPop(Chromo[] members) {
+		Map<Integer, Double> ratios = new HashMap<>();
+		Map<Integer, Integer> ranks = new HashMap<>();
+		boolean skipped = true;
+		int r = 1;
+
+		// get ratios
+		for(int i = 0; i < members.length; i++) {
+			ratios.put(i, members[i].getSortinoRatio());
+			ranks.put(i, 0);
+		}
+
+		// start ranking
+		for(int i = 0; i < members.length; i++){
+			if(ranks.get(i) != 0){
+				continue;
+			}
+
+			for(int j = 0; j < members.length; j++) {
+				if(j == i || ranks.get(j) != 0) {
+					continue;
+				}
+
+				if(ratios.get(i) > ratios.get(j)) {
+					ranks.put(j, r);
+					skipped = false;
+				}
+			}
+
+			if(!skipped) {
+				r += 1;
+			}
+		}
+
+//		//LinkedHashMap preserve the ordering of elements
+//		LinkedHashMap<Integer, Integer> sortedRanks = new LinkedHashMap<>();
+//
+//		// sort elements
+//		ranks.entrySet().stream()
+//				.sorted(Map.Entry.comparingByValue())
+//				.forEachOrdered(x -> {
+//					sortedRanks.put(x.getKey(), x.getValue());
+//				});
+
+//		List<Integer> ranks = new ArrayList<>(ratios.keySet());
+		return ranks;
+	}
+
 
 }   // End of Search.Java ******************************************************
 

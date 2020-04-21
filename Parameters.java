@@ -40,6 +40,7 @@ public class Parameters
 	public static int geneSize;
 
 	public static List<String> stockList;
+	public static Map<Integer, List<Float>> yearReturns;
 
 /*******************************************************************************
 *                              CONSTRUCTORS                                    *
@@ -55,6 +56,7 @@ public class Parameters
 
 		dataInputFileName = parmInput.readLine().substring(30);
 		stockList = parseStockList(dataInputFileName);
+		yearReturns = parseStockData();
 
 		numRuns = Integer.parseInt(parmInput.readLine().substring(30).trim());
 		generations = Integer.parseInt(parmInput.readLine().substring(30).trim());
@@ -98,8 +100,36 @@ public class Parameters
 		return temp;
 	}
 
+	public static Map<Integer, List<Float>> parseStockData() throws IOException {
+		File folder = new File("./stockData/");
+		File[] listOfFiles = folder.listFiles();
+		BufferedReader br;
+		String line;
+		Map<Integer, List<Float>> tickerReturns = new HashMap<>();
 
-/*******************************************************************************
+		for(File file : listOfFiles){
+			br = new BufferedReader(new FileReader(file));
+			List<Float> yearReturns = new ArrayList<>();
+
+			// skip the first line of header info
+			br.readLine();
+
+			while ((line = br.readLine()) != null)
+			{
+				String[] data = line.split(",");
+				float close = Float.parseFloat(data[1]);
+				float open = Float.parseFloat(data[0]);
+				yearReturns.add(close-open);
+			}
+			String name = file.getName().split("/")[0].replace(".csv","");
+			tickerReturns.put(stockList.indexOf(name), yearReturns);
+		}
+
+		return tickerReturns;
+	}
+
+
+	/*******************************************************************************
 *                             STATIC METHODS                                   *
 *******************************************************************************/
 
