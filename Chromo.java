@@ -28,6 +28,7 @@ public class Chromo
 *******************************************************************************/
 
 	private static double randnum;
+	private static int unitCap = 10;
 
 /*******************************************************************************
 *                              CONSTRUCTORS                                    *
@@ -45,7 +46,7 @@ public class Chromo
 		for (int i=0; i<Parameters.numGenes; i++){
 			String group = "";
 			noDuplicates.clear();
-			randGroupSize = Search.r.nextInt(Parameters.geneSize) + 5;
+			randGroupSize = Search.r.nextInt(Parameters.geneSize - 5) + 5;
 			for (int j=0; j<randGroupSize; j++){
 				randInt = Search.r.nextInt(Parameters.stockList.size());
 
@@ -78,7 +79,7 @@ public class Chromo
 				}
 			}
 
-			portfolio += (Search.r.nextInt(9) + 1);
+			portfolio += (Search.r.nextInt(unitCap) + 1);
 
 			this.chromo.put(group, portfolio);
 		}
@@ -153,6 +154,8 @@ public class Chromo
 			iterated++;
 		}
 
+		randInt1 = Search.r.nextInt(Parameters.popSize);
+		tempChromo = new HashMap<>(Search.member[randInt1].chromo);
 		randInt2 = Search.r.nextInt(tempChromo.size());
 		iterated = 0;
 		for (Map.Entry<String, String> entry : tempChromo.entrySet()) {
@@ -214,6 +217,38 @@ public class Chromo
 		return randGen;
 	}
 
+	public static double getYoy_help(String group, String portfolio) {
+
+		String[] gr = splitToNChar(group, 2);
+		double bi = (double)Integer.parseInt(portfolio.substring(0,7), 2) / 127.0;
+		int units = Integer.parseInt(portfolio.substring(7));
+		float r;
+		float weight;
+		List<Float> returns;
+		int ticker;
+		double yoy = 0;
+
+		for (String s : gr) {
+			ticker = Integer.parseInt(s);
+			returns = Parameters.yearReturns.get(ticker);
+			r = returns.get(returns.size() - 1); // 2019
+			if (bi > 0.5) {
+				yoy += r * (units);
+			}
+		}
+
+		return yoy/gr.length;
+	}
+
+	public float getYoy(){
+		float yoy = 0;
+		for(Map.Entry<String, String> entry : chromo.entrySet()) {
+			yoy += getYoy_help(entry.getKey(), entry.getValue());
+		}
+
+		return yoy/chromo.size();
+	}
+
 	// get 2-year return for individual
 	public double getPortReturn(String group, String portfolio) {
 		float portReturn= 0;
@@ -228,21 +263,25 @@ public class Chromo
 		for (String s : gr) {
 			ticker = Integer.parseInt(s);
 			returns = Parameters.yearReturns.get(ticker);
-			// only get last two years
-			r = returns.get(returns.size() - 1) + returns.get(returns.size() - 2);
+			r = 0;
+			// only get up until 2018
+			for(int i = 0; i < returns.size() - 1; i ++) {
+				r += returns.get(i);
+			}
+
 			weight = (float) (1.0/gr.length);
 
 			if (bi > 0.5) {
-				portReturn += weight * (r * (units));
+				portReturn += (weight * r);
 			}
 		}
 
-		return portReturn;
+		return portReturn * units;
 	}
 
 	public double getSortinoRatio(){
 		double sortino;
-		double prt = 10.00;
+		double prt = 0.1;
 		double avgPortReturn = 0;
 		double dsd = 0;
 		double portReturn;
@@ -255,6 +294,9 @@ public class Chromo
 
 		avgPortReturn /= chromo.size();
 		dsd = Math.sqrt(dsd/chromo.size());
+		if(dsd == 0) {
+			dsd = 0.01;
+		}
 		sortino = (avgPortReturn - prt)/dsd;
 
 		return sortino;
@@ -301,7 +343,6 @@ public class Chromo
 			int iterated = 0;
 			String newGroup = "";
 			boolean added = false;
-			Random r = new Random(Parameters.seed);
 			for(Map.Entry<String, String> entry : chromo.entrySet()) {
 				if (iterated == randGroup1 || iterated == randGroup2) {
 					List<String> group = Arrays.asList(splitToNChar(entry.getKey(), 2));
@@ -324,7 +365,7 @@ public class Chromo
 					set.addAll(newGroupL);
 					if(mutChromo.containsKey(String.join("",set))){
 						List<String> inverse = new ArrayList<>(set);
-						Collections.reverse(inverse);
+						Collections.shuffle(inverse, Search.r);
 						mutChromo.put(String.join("",inverse), entry.getValue());
 					}
 					else {
@@ -356,7 +397,7 @@ public class Chromo
 					}
 
 					// change unit randomly
-					int newUnit = (Search.r.nextInt(9) + 1);
+					int newUnit = (Search.r.nextInt(unitCap) + 1);
 					portfolio = temp + newUnit;
 					mutChromo.put(entry.getKey(), portfolio);
 					break;
@@ -382,7 +423,7 @@ public class Chromo
 
 		double rWheel = 0;
 		int j = 0;
-		int k = Parameters.popSize/10;
+		int k = Parameters.popSize/2;
 
 		switch (Parameters.selectType){
 

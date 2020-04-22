@@ -53,6 +53,7 @@ public class DGSP extends FitnessFunction {
         }
         else {
             double fitness = 0;
+            values = new ArrayList<>(ranks.values());
             for(int j = 0; j < ranks.size(); j++) {
                 if(j == pos) {continue;}
                 if(ranks.get(j) < currentRank) {
@@ -68,6 +69,7 @@ public class DGSP extends FitnessFunction {
                 }
             }
             X.rawFitness+=1;
+            X.rawFitness /= Collections.frequency(values, currentRank);
 //            X.rawFitness = 1.0/(X.rawFitness);
             int i = 0;
         }

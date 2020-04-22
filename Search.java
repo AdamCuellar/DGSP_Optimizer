@@ -78,6 +78,7 @@ public class Search {
 
 	public static void main(String[] args) throws java.io.IOException{
 
+		long startT = System.currentTimeMillis();
 		Calendar dateAndTime = Calendar.getInstance(); 
 		Date startTime = dateAndTime.getTime();
 
@@ -345,6 +346,17 @@ public class Search {
 					}
 				}
 
+				// do year over year return for 2019
+				if((R == Parameters.numRuns && G == Parameters.generations-1))
+				{
+					double yoyAvg = 0;
+					for(int i = 0; i < nds.size(); i++) {
+						yoyAvg += member[i].getYoy();
+					}
+					yoyAvg /= nds.size();
+					System.out.println("Average Year Over Year Return (2019): " + yoyAvg);
+				}
+
 				//  Assumes always two offspring per mating
 				for (int i=0; i<Parameters.popSize; i=i+2){
 
@@ -409,6 +421,9 @@ public class Search {
 		dateAndTime = Calendar.getInstance(); 
 		Date endTime = dateAndTime.getTime();
 		System.out.println("End  :  " + endTime);
+
+		long endT = System.currentTimeMillis();
+		System.out.println("Total Runtime (ms): " + (endT-startT));
 
 	} // End of Main Class
 
