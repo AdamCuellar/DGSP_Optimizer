@@ -2,17 +2,17 @@ Experiment ID                :dgsp
 Problem Type                 :dgsp
 Data Input File Name         :stockList.txt
 Number of Runs               :100
-Generations per Run          :50
-Population Size              :100
+Generations per Run          :100
+Population Size              :50
 Selection Method (1)         :2
 Fitness Scaling Type (2)     :0
 Crossover Type (3)           :1
 Crossover Rate (4)           :0.8
 Mutation Type (5)            :1
-Mutation Rate (6)            :0.005
+Mutation Rate (6)            :0.09
 Random Number Seed           :75982
 Number of Genes/Points (7)   :10
-Size of Genes (18)           :10
+Size of Genes (18)           :20
 
 Notes:
 
@@ -35,4 +35,4 @@ Notes:
 
 7)	Represents number of groups in each chromosome.
 
-8)	Determines number of stocks in each group.
+8)	Determines the max number of stocks in each group.

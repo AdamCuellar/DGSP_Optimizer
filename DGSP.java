@@ -33,7 +33,6 @@ public class DGSP extends FitnessFunction {
 //FIXHERE Calculate using dominated fronts calculated by rank in selection function. Fitness Function =>(depends on) Selection Function
     public void doRawFitness(Chromo X, Map<Integer, Integer> ranks, int pos) {
 
-        List<Integer> values = new ArrayList<>(ranks.values());
         int currentRank = ranks.get(pos);
 
         // exit if we've already calculated the fitness
@@ -42,17 +41,21 @@ public class DGSP extends FitnessFunction {
         }
 
         X.rawFitness = 0;
-
+        List<Integer> values;
+        float numerator;
+        float denom;
         if(currentRank == 1){
-            float numerator = (values.size() - Collections.frequency(values, currentRank));
-            float denom = (Parameters.popSize + 1);
-            X.rawFitness += (numerator/denom);
+            values = new ArrayList<>(ranks.values());
+            numerator = (values.size() - Collections.frequency(values, currentRank));
+            denom = (Parameters.popSize);
+            X.rawFitness = (numerator/(denom + 1.0));
+            int i = 0;
         }
         else {
             double fitness = 0;
             for(int j = 0; j < ranks.size(); j++) {
                 if(j == pos) {continue;}
-                if(ranks.get(j) <= (currentRank - 1)) {
+                if(ranks.get(j) < currentRank) {
                     if(Search.member[j].rawFitness > 0){
                         fitness = Search.member[j].rawFitness;
                         X.rawFitness += fitness;
@@ -64,8 +67,9 @@ public class DGSP extends FitnessFunction {
                     }
                 }
             }
-
-            X.rawFitness += 1;
+            X.rawFitness+=1;
+//            X.rawFitness = 1.0/(X.rawFitness);
+            int i = 0;
         }
 
         return;
@@ -74,20 +78,10 @@ public class DGSP extends FitnessFunction {
 
 //  PRINT OUT AN INDIVIDUAL GENE TO THE SUMMARY FILE *********************************
 
-//        public void doPrintGenes (Chromo X, FileWriter output) throws java.io.IOException {
-//
-//            for (int i=0; i<Parameters.numGenes; i++){
-//            		Hwrite.right(X.getGeneAlpha(i),11,output);
-//            	}
-//            	output.write("   RawFitness");
-//		output.write("\n        ");
-//            	for (int i=0; i<Parameters.numGenes; i++){
-//            		Hwrite.right(X.getPosIntGeneValue(i),11,output);
-//            	}
-//            	Hwrite.right((int) X.rawFitness,13,output);
-//            	output.write("\n\n");
-//            	return;
-//        }
+        public void doPrintGenes (Chromo X, FileWriter output) throws java.io.IOException {
+            	output.write("\n");
+            	return;
+        }
 
 /*******************************************************************************
  *                             STATIC METHODS                                   *

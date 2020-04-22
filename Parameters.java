@@ -119,7 +119,8 @@ public class Parameters
 				String[] data = line.split(",");
 				float close = Float.parseFloat(data[1]);
 				float open = Float.parseFloat(data[0]);
-				yearReturns.add(close-open);
+				float rOr = (close/open) - (float) 1.0;
+				yearReturns.add(rOr*100);
 			}
 			String name = file.getName().split("/")[0].replace(".csv","");
 			tickerReturns.put(stockList.indexOf(name), yearReturns);

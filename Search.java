@@ -3,9 +3,13 @@
 *  Version 2, January 18, 2004
 *******************************************************************************/
 
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.*;
+import java.nio.Buffer;
 import java.util.*;
 import java.text.*;
+import java.util.List;
 
 public class Search {
 
@@ -53,6 +57,10 @@ public class Search {
 	private static double TmemberFitness;
 
 	private static double fitnessStats[][];  // 0=Avg, 1=Best
+
+	public static Map<Integer, Integer> ranks;
+	public static List<Integer> nds;
+	private static Map<Integer, Point2D> objectives;
 
 /*******************************************************************************
 *                              CONSTRUCTORS                                    *
@@ -143,7 +151,7 @@ public class Search {
 				bestOfGenChromo.rawFitness = defaultBest;
 
 				// rank each member
-				Map<Integer, Integer> ranks = rankPop(member);
+				ranks = new HashMap(rankPop(member));
 
 				//	Test Fitness of Each Member
 				for (int i=0; i<Parameters.popSize; i++){
@@ -214,7 +222,7 @@ public class Search {
 				Hwrite.right(R, 3, summaryOutput);
 				summaryOutput.write(" G ");
 				Hwrite.right(G, 3, summaryOutput);
-				Hwrite.right((int)bestOfGenChromo.rawFitness, 7, summaryOutput);
+				Hwrite.right(bestOfGenChromo.rawFitness, 7, summaryOutput);
 				Hwrite.right(averageRawFitness, 11, 3, summaryOutput);
 				Hwrite.right(stdevRawFitness, 11, 3, summaryOutput);
 				summaryOutput.write("\n");
@@ -317,6 +325,26 @@ public class Search {
 				int parent1 = -1;
 				int parent2 = -1;
 
+				nds = new ArrayList(getNDS());
+
+				// get points and genes of NDS
+				if((R == 1 && G == 0) || (R == Parameters.numRuns && G == Parameters.generations-1)) {
+					BufferedWriter writer;
+					try {
+						String name = "NDS_Solutions_" + R + ".txt";
+						File logFile = new File(name);
+						writer = new BufferedWriter(new FileWriter(logFile));
+						Point2D temp;
+						for(int i = 0; i < nds.size(); i++) {
+							temp = objectives.get(nds.get(i));
+							writer.write("Point: (" + temp.getX() + "," + temp.getY() + ") Chromo: " + member[nds.get(i)].chromo + "\n");
+						}
+						writer.close();
+					} catch (Exception e) {
+						System.out.println("ERROR - Error writing NDS");
+					}
+				}
+
 				//  Assumes always two offspring per mating
 				for (int i=0; i<Parameters.popSize; i=i+2){
 
@@ -355,7 +383,8 @@ public class Search {
 
 			problem.doPrintGenes(bestOfRunChromo, summaryOutput);
 
-			System.out.println(R + "\t" + "B" + "\t"+ (int)bestOfRunChromo.rawFitness);
+			System.out.println(R + "\t" + "B" + "\t"+ bestOfRunChromo.rawFitness);
+			System.out.println();
 
 		} //End of a Run
 
@@ -384,53 +413,70 @@ public class Search {
 	} // End of Main Class
 
 	private static Map<Integer, Integer> rankPop(Chromo[] members) {
-		Map<Integer, Double> ratios = new HashMap<>();
-		Map<Integer, Integer> ranks = new HashMap<>();
-		boolean skipped = true;
-		int r = 1;
+		Map<Integer, Point2D> objCopy;
+		objectives = new HashMap<>();
+		Map<Integer, Integer> ranksT = new HashMap<>();
 
-		// get ratios
+		// get objectives
 		for(int i = 0; i < members.length; i++) {
-			ratios.put(i, members[i].getSortinoRatio());
-			ranks.put(i, 0);
+			Point2D newPoint = new Point2D.Double(members[i].getSortinoRatio(), members[i].getGroupBalance());
+			objectives.put(i, newPoint);
 		}
 
-		// start ranking
-		for(int i = 0; i < members.length; i++){
-			if(ranks.get(i) != 0){
-				continue;
-			}
+		// copy objectives
+		objCopy = new HashMap<>(objectives);
 
-			for(int j = 0; j < members.length; j++) {
-				if(j == i || ranks.get(j) != 0) {
+		// get ranks
+		Point2D currentPoint;
+		Point2D testPoint;
+		int r = 1;
+		boolean dominated;
+		while(objectives.size() > 0) {
+			for (int i = 0; i < members.length; i++) {
+				if (!objectives.containsKey(i)) {
 					continue;
 				}
+				currentPoint = objectives.get(i);
+				dominated = false;
+				for (int j = 0; j < members.length; j++) {
+					if (j == i || !objectives.containsKey(j)) {
+						continue;
+					}
+					testPoint = objectives.get(j);
+					if(currentPoint.getX() < testPoint.getX() && currentPoint.getY() < testPoint.getY()) {
+						dominated |= true;
+					} else {
+						dominated |= false;
+					}
+				}
 
-				if(ratios.get(i) > ratios.get(j)) {
-					ranks.put(j, r);
-					skipped = false;
+				if (dominated == false) {
+					ranksT.put(i, r);
+					objectives.remove(i);
 				}
 			}
+			r++;
+		}
 
-			if(!skipped) {
-				r += 1;
+		objectives = new HashMap<>(objCopy);
+		return ranksT;
+	}
+
+	private static List<Integer> getNDS(){
+		List<Integer> ndsTemp = new ArrayList<>();
+
+		// Select k members for tournament from NDS solutions
+		for(int j=0; j < Search.ranks.size(); j++)
+		{
+			if(Search.ranks.containsKey(j)) {
+				if (Search.ranks.get(j) == 1) {
+					ndsTemp.add(j);
+				}
 			}
 		}
 
-//		//LinkedHashMap preserve the ordering of elements
-//		LinkedHashMap<Integer, Integer> sortedRanks = new LinkedHashMap<>();
-//
-//		// sort elements
-//		ranks.entrySet().stream()
-//				.sorted(Map.Entry.comparingByValue())
-//				.forEachOrdered(x -> {
-//					sortedRanks.put(x.getKey(), x.getValue());
-//				});
-
-//		List<Integer> ranks = new ArrayList<>(ratios.keySet());
-		return ranks;
+		return ndsTemp;
 	}
-
 
 }   // End of Search.Java ******************************************************
 
